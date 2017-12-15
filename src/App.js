@@ -5,6 +5,23 @@ import openSocket from 'socket.io-client';
 import $ from 'jquery';
 
 class App extends Component {
+
+  constructor(props) {
+    super(props);
+  }
+
+  componentDidMount(){
+
+  }
+
+  testSubmit(event){
+    event.preventDefault();
+    $.ajax({
+      type: "POST",
+      url: "http://localhost:3001/"
+    });
+  }
+
   render() {
     return (
       <div>
@@ -28,9 +45,9 @@ class App extends Component {
             </div>
           </li>
         </ul>
-        <form action="/" method="post">
+        <form>
           <input type="text" name="username" />
-          <button type="submit">Submit</button>
+          <button type="submit" onClick={this.testSubmit}>Submit</button>
         </form>
       </div>
 

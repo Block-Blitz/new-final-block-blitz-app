@@ -5,6 +5,7 @@
   "dependencies": {
     "express": "^4.16.2",
     "jquery": "^3.2.1",
+    "knex": "^0.14.2",
     "node-sass-chokidar": "0.0.3",
     "npm-run-all": "^4.1.2",
     "packery": "^2.1.1",
