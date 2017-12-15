@@ -1,3 +1,4 @@
+const pg = require('pg');
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const config = require('./webpack.config');
@@ -17,3 +18,10 @@ new WebpackDevServer(webpack(config), {
 
     console.log('Running at http://0.0.0.0:3000');
   });
+
+const connection = pg.createConnection({
+  host: ENV['DB_HOST'],
+  user: ENV['DB_USER'],
+  password: ENV['DB_PASS'],
+  database: ENV['DB_NAME'],
+});
