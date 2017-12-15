@@ -9,6 +9,7 @@ var port = process.env.PORT || 3001;
 var loopLimit = 0;
 const pg = require('pg');
 const helpers = require('../lib/helpers.js');
+const bodyParser = require('body-parser');
 
 server.listen(port, function () {
   console.log('Server listening at port %d', port);
@@ -17,6 +18,7 @@ server.listen(port, function () {
 
 // Routing
 app.use(express.static(__dirname));
+app.use(bodyParser.urlencoded({extended:true}));
 
 // Log knex SQL queries to STDOUT as well
 //app.use(knexLogger(knex));
@@ -25,10 +27,11 @@ app.use(express.static(__dirname));
 app.post('/', function(req, res) {
   console.log('hello from websocket');
   // Get sent data.
-  const user = req.body;
+  const user = req.body.user;
   console.log("req:", req);
   console.log("req body:", req.body);
-  console.log("user:", user);
+  console.log("req body:", req.body.user);
+  //console.log("user:", user);
   // Do a MySQL query.
   helpers.insertIntoUsers(user).then(() => res.end('Success'));
 });

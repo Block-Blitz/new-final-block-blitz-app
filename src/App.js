@@ -16,9 +16,14 @@ class App extends Component {
 
   testSubmit(event){
     event.preventDefault();
+    // this object is calling the value of the form(username)
+    const obj = {
+      user : this.refs.username.value
+    }
     $.ajax({
       type: "POST",
-      url: "http://localhost:3001/"
+      url: "http://localhost:3001/",
+      data: obj
     });
   }
 
@@ -41,13 +46,13 @@ class App extends Component {
           <li className="login page">
             <div className="form">
               <h3 className="title">What's your nickname?</h3>
-              <input className="usernameInput" type="text" maxlength="14" />
+              <input className="usernameInput" type="text" maxLength="14" />
             </div>
           </li>
         </ul>
         <form>
-          <input type="text" name="username" />
-          <button type="submit" onClick={this.testSubmit}>Submit</button>
+          <input type="text" name="username" ref="username" />
+          <button type="submit" onClick={this.testSubmit.bind(this)}>Submit</button>
         </form>
       </div>
 
