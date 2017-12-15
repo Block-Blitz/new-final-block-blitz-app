@@ -1,4 +1,5 @@
 // Setup basic express server
+require('dotenv').config({ path: '../.env' });
 var express = require('express');
 var app = express();
 var fs = require('fs');
@@ -6,16 +7,31 @@ var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var port = process.env.PORT || 3001;
 var loopLimit = 0;
+const pg = require('pg');
+const helpers = require('../lib/helpers.js');
 
 server.listen(port, function () {
   console.log('Server listening at port %d', port);
-  fs.writeFile(__dirname + '/start.log', 'started'); 
+  fs.writeFile(__dirname + '/start.log', 'started');
 });
 
 // Routing
 app.use(express.static(__dirname));
 
-// Entire gameCollection Object holds all games and info
+// Log knex SQL queries to STDOUT as well
+//app.use(knexLogger(knex));
+
+// Listen to POST requests to /.
+app.post('/', function(req, res) {
+  console.log('hello from websocket');
+  // Get sent data.
+  const user = req.body;
+  console.log("req:", req);
+  console.log("req body:", req.body);
+  console.log("user:", user);
+  // Do a MySQL query.
+  helpers.insertIntoUsers(user).then(() => res.end('Success'));
+});
 
 var gameCollection =  new function() {
 
@@ -51,16 +67,16 @@ function killGame(socket) {
     var gameId = gameCollection.gameList[i]['gameObject']['id']
     var plyr1Tmp = gameCollection.gameList[i]['gameObject']['playerOne'];
     var plyr2Tmp = gameCollection.gameList[i]['gameObject']['playerTwo'];
-    
+
     if (plyr1Tmp == socket.username){
-      --gameCollection.totalGameCount; 
+      --gameCollection.totalGameCount;
       console.log("Destroy Game "+ gameId + "!");
       gameCollection.gameList.splice(i, 1);
       console.log(gameCollection.gameList);
       socket.emit('leftGame', { gameId: gameId });
       io.emit('gameDestroyed', {gameId: gameId, gameOwner: socket.username });
       notInGame = false;
-    } 
+    }
     else if (plyr2Tmp == socket.username) {
       gameCollection.gameList[i]['gameObject']['playerTwo'] = null;
       console.log(socket.username + " has left " + gameId);
@@ -68,7 +84,7 @@ function killGame(socket) {
       console.log(gameCollection.gameList[i]['gameObject']);
       notInGame = false;
 
-    } 
+    }
 
   }
 
@@ -190,7 +206,7 @@ io.on('connection', function (socket) {
 
 
       gameSeeker(socket);
-      
+
     }
 
   });
@@ -201,7 +217,7 @@ io.on('connection', function (socket) {
 
     if (gameCollection.totalGameCount == 0){
      socket.emit('notInGame');
-     
+
    }
 
    else {

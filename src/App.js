@@ -2,19 +2,33 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import openSocket from 'socket.io-client';
-import $ from 'jquery'; 
+import $ from 'jquery';
 
 class App extends Component {
+
+  constructor(props) {
+    super(props);
+  }
+
+  componentDidMount(){
+
+  }
+
+  testSubmit(event){
+    event.preventDefault();
+    $.ajax({
+      type: "POST",
+      url: "http://localhost:3001/"
+    });
+  }
+
   render() {
     return (
       <div>
         <ul className="pages">
           <div className='gameButtons'>
             <button className='joinGame' placeholder="Join Game">Join Game</button>
-            <br/>
             <button className='leaveGame' placeholder="Leave Game">Exit Game</button>
-            <br/>
-
           </div>
           <div className="chatArea">
             <ul className="messages"></ul>
@@ -31,6 +45,10 @@ class App extends Component {
             </div>
           </li>
         </ul>
+        <form>
+          <input type="text" name="username" />
+          <button type="submit" onClick={this.testSubmit}>Submit</button>
+        </form>
       </div>
 
     );
@@ -56,8 +74,8 @@ $(function() {
 
   var $loginPage = $('.login.page'); // The login page
   var $chatPage = $('.chat.page'); // The chatroom page
-  var $joinGame = $('.joinGame'); 
-  var $leaveGame = $('.leaveGame'); 
+  var $joinGame = $('.joinGame');
+  var $leaveGame = $('.leaveGame');
 
   // Prompt for setting a username
   var username;
@@ -92,7 +110,7 @@ $(function() {
 
       // Tell the server your username
       socket.emit('add user', username);
-      
+
     }
   }
 
@@ -340,18 +358,18 @@ $(function() {
     log(data.username + ' created Game: ' + data.gameId);
     //alert("Game Created! ID is: "+ JSON.stringify(data));
   });
-  
+
   socket.on('disconnect', function () {
    log('you have been disconnected');
  });
-  
+
   socket.on('reconnect', function () {
    log('you have been reconnected');
    if (username) {
      socket.emit('add user', username);
    }
  });
-  
+
   socket.on('reconnect_error', function () {
    log('attempt to reconnect has failed');
  });
@@ -385,7 +403,7 @@ socket.on('notInGame', function () {
   log('You are not currently in a Game.');
 });
 
-socket.on('gameDestroyed', function (data) { 
+socket.on('gameDestroyed', function (data) {
   log( data.gameOwner+ ' destroyed game: ' + data.gameId);
 
 });

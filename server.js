@@ -1,6 +1,35 @@
+const pg = require('pg');
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const config = require('./webpack.config');
+const knexConfig  = require("./knexfile");
+const knex        = require("knex")(knexConfig[ENV]);
+
+const helpers = require('./lib/helpers.js');
+const express = require('express');
+const app = express();
+console.log("running");
+
+const connection = pg.createConnection({
+  host: ENV['DB_HOST'],
+  user: ENV['DB_USER'],
+  password: ENV['DB_PASS'],
+  database: ENV['DB_NAME'],
+});
+
+// Log knex SQL queries to STDOUT as well
+app.use(knexLogger(knex));
+
+// Listen to POST requests to /.
+app.post('/', function(req, res) {
+  console.log('hello');
+  // Get sent data.
+  const user = req.body;
+  // Do a MySQL query.
+  helpers.insertIntoUsers(user);
+  res.end('Success');
+});
+
 
 new WebpackDevServer(webpack(config), {
   publicPath: config.output.publicPath,
@@ -17,3 +46,4 @@ new WebpackDevServer(webpack(config), {
 
     console.log('Running at http://0.0.0.0:3000');
   });
+
