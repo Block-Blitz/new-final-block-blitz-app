@@ -45,7 +45,6 @@ var gameCollection =  new function() {
 
 function buildGame(socket) {
 
-
  var gameObject = {};
  gameObject.id = (Math.random()+1).toString(36).slice(2, 18);
  gameObject.playerOne = socket.username;
@@ -54,6 +53,10 @@ function buildGame(socket) {
  gameCollection.gameList.push({gameObject});
 
  console.log("Game Created by "+ socket.username + " w/ " + gameObject.id);
+
+
+ socket.join(gameObject.id.toString());
+ console.log(io.sockets.adapter.rooms);
  io.emit('gameCreated', {
   username: socket.username,
   gameId: gameObject.id
@@ -112,7 +115,10 @@ function gameSeeker (socket) {
       gameCollection.gameList[rndPick]['gameObject']['playerTwo'] = socket.username;
       socket.emit('joinSuccess', {
         gameId: gameCollection.gameList[rndPick]['gameObject']['id'] });
-
+      socket.join(gameCollection.gameList[rndPick].gameObject.id);
+      console.log("gameCollection:", gameCollection.gameList[rndPick].gameObject.id);
+      console.log("socket.rooms:::", socket.rooms);
+      console.log("adapter", io.sockets.adapter.rooms);
       console.log( socket.username + " has been added to: " + gameCollection.gameList[rndPick]['gameObject']['id']);
 
     } else {
