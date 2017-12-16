@@ -17,9 +17,42 @@ class Home extends Component {
     });
   }
 
+  render(){
+    return (
+      <div>
+        <ul className="pages">
+          <div className='gameButtons'>
+            <button className='joinGame' placeholder="Join Game">Join Game</button>
+            <button className='leaveGame' placeholder="Leave Game">Exit Game</button>
+          </div>
+          <div className="chatArea">
+            <ul className="messages"></ul>
+          </div>
+          <li className="usersList">
+            <div className="usersList">
+              <ul className="Users"></ul>
+            </div>
+          </li>
+          <li className="login page">
+            <div className="form">
+              <h3 className="title">What's your nickname?</h3>
+              <input className="usernameInput" type="text" maxLength="14" />
+            </div>
+          </li>
+        </ul>
+        <form>
+          <input type="text" name="username" ref="username" />
+          <button type="submit" onClick={this.testSubmit.bind(this)}>Submit</button>
+        </form>
+      </div>
+    );
+  }
+}
 
 
-  $(function() {
+export default Home
+
+$(function() {
   var FADE_TIME = 150; // ms
   var TYPING_TIMER_LENGTH = 400; // ms
   var COLORS = [
@@ -371,37 +404,3 @@ socket.on('gameDestroyed', function (data) {
 });
 
 });
-
-  render(){
-    return (
-      <div>
-        <ul className="pages">
-          <div className='gameButtons'>
-            <button className='joinGame' placeholder="Join Game">Join Game</button>
-            <button className='leaveGame' placeholder="Leave Game">Exit Game</button>
-          </div>
-          <div className="chatArea">
-            <ul className="messages"></ul>
-          </div>
-          <li className="usersList">
-            <div className="usersList">
-              <ul className="Users"></ul>
-            </div>
-          </li>
-          <li className="login page">
-            <div className="form">
-              <h3 className="title">What's your nickname?</h3>
-              <input className="usernameInput" type="text" maxLength="14" />
-            </div>
-          </li>
-        </ul>
-        <form>
-          <input type="text" name="username" ref="username" />
-          <button type="submit" onClick={this.testSubmit.bind(this)}>Submit</button>
-        </form>
-      </div>
-    );
-  }
-}
-
-export default Home
