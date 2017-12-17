@@ -10,7 +10,8 @@ class Register extends Component {
       success: 'Thank you for registering',
       successCheck: false,
       errorCheck: false,
-      error: ''
+      error: '',
+      loading: false
     }
   }
 
@@ -37,7 +38,7 @@ class Register extends Component {
   render() {
     if (this.state.successCheck) {
       return ( 
-        <div>Thank you for registering</div>
+        <div>{this.state.success}</div>
         )
     } else {
       return ( 
@@ -51,6 +52,9 @@ class Register extends Component {
   }
   formSubmit = data => {
     data.preventDefault();
+    this.setState({
+      loading: true
+    });
     fetch('http://localhost:3001/register', {
       method: 'POST',
       mode: 'cors',
@@ -65,16 +69,14 @@ class Register extends Component {
       })
     })
     .then(function(response) {
-      // console.log(response);
-      // console.log(response.data);
-      // console.log(response.response);
-      // console.log(response.response.data);
+      this.setState({
+        // TODO FINISH LOADING ICON
+        loading: false
+      });
     })
     .catch(error => {
       // console.log(error);
     });
-
-
   }
 }
 
