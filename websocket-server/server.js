@@ -1,6 +1,6 @@
 // Setup basic express server
-require('dotenv').config({ path: '../.env' });
-var express = require('express');
+require('dotenv').config({path: '../.env'});
+const express = require('express');
 const cookieSession = require('cookie-session');
 const app = express();
 const fs = require('fs');
@@ -8,18 +8,15 @@ const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const port = process.env.PORT || 3001;
 const loopLimit = 0;
-const helpers = require('../lib/helpers.js');
+const helpers = require('./lib/helpers.js');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
-const flash = require('connect-flash');
-
 
 server.listen(port, function() {
   console.log('Server listening at port %d', port);
   fs.writeFile(__dirname + '/start.log', 'started');
 });
 
-// Routing
 app.use(express.static(__dirname));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
@@ -32,33 +29,22 @@ app.use(cookieSession({
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
 
-app.use(flash());
-
 app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   next();
 });
 
-// Log knex SQL queries to STDOUT as well
-
 // Listen to POST requests to /.
+// TODO DELETE THIS LATER IT WAS A TEST ROUTE, more found at home.jsx
 app.post('/', function(req, res, next) {
-  console.log('hello from websocket');
-  // Get sent data.
   const user = req.body.user;
-  console.log("req:", req);
-  console.log("req body:", req.body);
-  console.log("req body:", req.body.user);
-  //console.log("user:", user);
-  // Do a MySQL query.
   helpers.insertIntoUsers(user).then(() => res.end('Success'));
 });
 
 app.post('/register', function(req, res, next) {
   const handle = req.body.handle;
   const email = req.body.email;
-
   const password = bcrypt.hashSync(req.body.password, 10);
   if (!req.body.email || !req.body.password || !req.body.handle) {
     io.emit('fillAllFields');
@@ -78,11 +64,43 @@ app.post('/register', function(req, res, next) {
         io.emit('emailNotUnique');
       }
     });
+});
 
-  // console.log("user:", user);
-  // Do a MySQL query.
-  // helpers.createNewUser(handle, email, password).then(() => res.end('Success'));
-
+// Log user in
+app.post('/login', (req, res, next) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  if (!req.body.email || !req.body.password) {
+    io.emit('fillAllFields');
+    // res.redirect(req.get('referer'));
+    return;
+  }
+  helpers.checkEmailInDB(email, password)
+    .then(exists => {
+      if (exists) {
+        helpers.checkLogin(email, password)
+          .then(exists => {
+            if (exists) {
+              console.log('I AM BEFORE THE COOKIE IS SET');
+              req.session.user_id = exists;
+              // res.redirect(req.get('referer'));
+              console.log('I AM AFTER THE COOKIE IS SET AND USER SHOULD BE LOGGED IN.');
+              io.emit('success');
+            }
+            else {
+              // res.redirect(req.get('doNotMatch'));
+              io.emit('doNotMatch');
+              return;
+            }
+          });
+      }
+      else {
+        // req.flash('error', 'Email is not registered');
+        io.emit('EmailNotRegistered');
+        // res.redirect(req.get('referer'));
+        return;
+      }
+    });
 });
 
 
