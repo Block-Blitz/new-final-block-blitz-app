@@ -1,20 +1,14 @@
-const pg = require('pg');
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const config = require('./webpack.config');
-const knexConfig  = require("./knexfile");
-const knex        = require("knex")(knexConfig[ENV]);
-
-const helpers = require('./lib/helpers.js');
 const express = require('express');
 const app = express();
-console.log("running");
+console.log('running');
 
-const connection = pg.createConnection({
-  host: ENV['DB_HOST'],
-  user: ENV['DB_USER'],
-  password: ENV['DB_PASS'],
-  database: ENV['DB_NAME'],
+app.use(function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
 });
 
 // Log knex SQL queries to STDOUT as well
