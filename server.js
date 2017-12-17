@@ -17,18 +17,24 @@ const connection = pg.createConnection({
   database: ENV['DB_NAME'],
 });
 
-// Log knex SQL queries to STDOUT as well
-app.use(knexLogger(knex));
-
-// Listen to POST requests to /.
-app.post('/', function(req, res) {
-  console.log('hello');
-  // Get sent data.
-  const user = req.body;
-  // Do a MySQL query.
-  helpers.insertIntoUsers(user);
-  res.end('Success');
+app.use(function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
 });
+
+// // Log knex SQL queries to STDOUT as well
+// app.use(knexLogger(knex));
+
+// // Listen to POST requests to /.
+// app.post('/', function(req, res) {
+//   console.log('hello');
+//   // Get sent data.
+//   const user = req.body;
+//   // Do a MySQL query.
+//   helpers.insertIntoUsers(user);
+//   res.end('Success');
+// });
 
 
 new WebpackDevServer(webpack(config), {
