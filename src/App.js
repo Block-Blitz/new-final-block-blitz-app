@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import openSocket from 'socket.io-client';
 import './App.css';
 import Main from './Main.js';
 import Header from './Header.js';
 import Game from './Game.js';
+import Packery from 'packery';
+import Draggabilly from 'draggabilly';
+// import "./puzzle-logic.js";
 
 class App extends Component {
 
@@ -19,7 +21,6 @@ class App extends Component {
   }
 
   componentDidMount(){
-
     this.state.socket.addEventListener('joinSuccess', (msg) => {
       console.log("game joined listener fired");
       this.setState({
@@ -28,6 +29,15 @@ class App extends Component {
       });
 
     });
+
+  // const script = document.createElement("script");
+
+  // script.type = "text/javascript"
+  // script.src = "./puzzle-logic.js";
+  // script.async = true;
+
+  // document.body.appendChild(script);
+
   }
 
   render() {
