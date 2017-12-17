@@ -1,30 +1,49 @@
 // Setup basic express server
 require('dotenv').config({ path: '../.env' });
 var express = require('express');
-var app = express();
-var fs = require('fs');
-var server = require('http').createServer(app);
-var io = require('socket.io')(server);
-var port = process.env.PORT || 3001;
-var loopLimit = 0;
-const pg = require('pg');
+const cookieSession = require('cookie-session');
+const app = express();
+const fs = require('fs');
+const server = require('http').createServer(app);
+const io = require('socket.io')(server);
+const port = process.env.PORT || 3001;
+const loopLimit = 0;
 const helpers = require('../lib/helpers.js');
 const bodyParser = require('body-parser');
+const bcrypt = require('bcrypt');
+const flash = require('connect-flash');
 
-server.listen(port, function () {
+
+server.listen(port, function() {
   console.log('Server listening at port %d', port);
   fs.writeFile(__dirname + '/start.log', 'started');
 });
 
 // Routing
 app.use(express.static(__dirname));
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
+// Sets the secure cookie session
+app.use(cookieSession({
+  name: 'session',
+  keys: ['Cleo'],
+
+  // Cookie Options
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}));
+
+app.use(flash());
+
+app.use(function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
 
 // Log knex SQL queries to STDOUT as well
-//app.use(knexLogger(knex));
 
 // Listen to POST requests to /.
-app.post('/', function(req, res) {
+app.post('/', function(req, res, next) {
   console.log('hello from websocket');
   // Get sent data.
   const user = req.body.user;
@@ -35,6 +54,37 @@ app.post('/', function(req, res) {
   // Do a MySQL query.
   helpers.insertIntoUsers(user).then(() => res.end('Success'));
 });
+
+app.post('/register', function(req, res, next) {
+  const handle = req.body.handle;
+  const email = req.body.email;
+
+  const password = bcrypt.hashSync(req.body.password, 10);
+  if (!req.body.email || !req.body.password || !req.body.handle) {
+    io.emit('fillAllFields');
+    return;
+  }
+  helpers.checkEmailInDB(handle, email, password)
+    .then(exists => {
+      if (!exists) {
+        return helpers.createNewUser(handle, email, password)
+          .then(user_id => {
+            req.session.user_id = user_id;
+            // res.redirect(req.get('referer'));
+            io.emit('success');
+          });
+      }
+      else {
+        io.emit('emailNotUnique');
+      }
+    });
+
+  // console.log("user:", user);
+  // Do a MySQL query.
+  // helpers.createNewUser(handle, email, password).then(() => res.end('Success'));
+
+});
+
 
 var gameCollection =  new function() {
 
@@ -101,7 +151,7 @@ function killGame(socket) {
 
 }
 
-function gameSeeker (socket) {
+function gameSeeker(socket) {
   ++loopLimit;
   if (( gameCollection.totalGameCount == 0) || (loopLimit >= 20)) {
 
@@ -133,7 +183,7 @@ function gameSeeker (socket) {
 
 var numUsers = 0;
 
-io.on('connection', function (socket) {
+io.on('connection', function(socket) {
   var addedUser = false;
 
   // when the client emits 'new message', this listens and executes
