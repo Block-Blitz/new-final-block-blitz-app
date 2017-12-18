@@ -14,13 +14,13 @@ class App extends Component {
     super(props);
 
     this.state = {
-      ready: false,
+      ready: true,
       game: "",
       socket: openSocket('http://localhost:3001')
     };
   }
 
-  componentDidMount(){
+  componentWillMount(){
     this.state.socket.addEventListener('joinSuccess', (msg) => {
       console.log("game joined listener fired");
       this.setState({

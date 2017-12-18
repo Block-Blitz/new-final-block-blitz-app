@@ -35,6 +35,11 @@ app.use(function(req, res, next) {
   next();
 });
 
+
+app.get('/puzzle', function(req, res, next) {
+  res.render('puzzle');
+});
+
 // Listen to POST requests to /.
 // TODO DELETE THIS LATER IT WAS A TEST ROUTE, more found at home.jsx
 app.post('/', function(req, res, next) {
@@ -181,13 +186,14 @@ function gameSeeker(socket) {
     if (gameCollection.gameList[rndPick]['gameObject']['playerTwo'] == null)
     {
       gameCollection.gameList[rndPick]['gameObject']['playerTwo'] = socket.username;
-      socket.emit('joinSuccess', {
-        gameId: gameCollection.gameList[rndPick]['gameObject']['id'] });
       socket.join(gameCollection.gameList[rndPick].gameObject.id);
-      console.log("gameCollection:", gameCollection.gameList[rndPick].gameObject.id);
+      var gameId = gameCollection.gameList[rndPick].gameObject.id
+      console.log("gameId:", gameId);
       console.log("socket.rooms:::", socket.rooms);
       console.log("adapter", io.sockets.adapter.rooms);
       console.log( socket.username + " has been added to: " + gameCollection.gameList[rndPick]['gameObject']['id']);
+      io.sockets.in(gameId).emit('joinSuccess', 'cool game');
+      // socket.emit('joinSuccess', { gameId: gameCollection.gameList[rndPick]['gameObject']['id'] });
 
     } else {
 
@@ -212,6 +218,8 @@ io.on('connection', function(socket) {
       message: data
     });
   });
+
+
 
   // when the client emits 'add user', this listens and executes
   socket.on('add user', function (username) {
