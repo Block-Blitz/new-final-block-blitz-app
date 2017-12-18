@@ -11,6 +11,24 @@ app.use(function(req, res, next) {
   next();
 });
 
+// Log knex SQL queries to STDOUT as well
+app.use(knexLogger(knex));
+app.use('src');
+
+// Listen to POST requests to /.
+app.post('/', function(req, res) {
+  console.log('hello');
+  // Get sent data.
+  const user = req.body;
+  // Do a MySQL query.
+  helpers.insertIntoUsers(user);
+  res.end('Success');
+});
+
+app.get('/puzzle', function(req, res) {
+  res.render('puzzle');
+});
+
 new WebpackDevServer(webpack(config), {
   publicPath: config.output.publicPath,
   watchOptions: {
